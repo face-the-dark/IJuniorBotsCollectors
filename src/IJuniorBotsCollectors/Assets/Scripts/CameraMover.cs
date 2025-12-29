@@ -2,10 +2,9 @@ using UnityEngine;
 
 public class CameraMover : MonoBehaviour
 {
-    [SerializeField] private float _minEdgeMapSize = -50f;
-    [SerializeField] private float _maxEdgeMapSize = 50f;
+    [SerializeField] private MapConfig _mapConfig;
     [SerializeField] private float _speed = 30f;
-    
+
     private void Update()
     {
         Vector3 viewportPoint = Camera.main.ScreenToViewportPoint(Input.mousePosition);
@@ -15,7 +14,7 @@ public class CameraMover : MonoBehaviour
         direction *= _speed * Time.deltaTime;
 
         transform.Translate(direction, Space.Self);
-        
+
         LimitByBorders();
     }
 
@@ -27,12 +26,12 @@ public class CameraMover : MonoBehaviour
             direction.x = -1;
         else if (viewportPoint.x > 1)
             direction.x = 1;
-        
+
         if (viewportPoint.y <= 0)
             direction.z = -1;
         else if (viewportPoint.y >= 1)
             direction.z = 1;
-        
+
         return direction;
     }
 
@@ -40,17 +39,17 @@ public class CameraMover : MonoBehaviour
     {
         float positionX = transform.position.x;
         float positionZ = transform.position.z;
-        
-        if (transform.position.x < _minEdgeMapSize)
-            positionX = _minEdgeMapSize;
-        else if (transform.position.x > _maxEdgeMapSize)
-            positionX = _maxEdgeMapSize;
-        
-        if (transform.position.z < _minEdgeMapSize)
-            positionZ = _minEdgeMapSize;
-        else if (transform.position.z > _maxEdgeMapSize)
-            positionZ = _maxEdgeMapSize;
-        
+
+        if (transform.position.x < _mapConfig.MinEdgeSize)
+            positionX = _mapConfig.MinEdgeSize;
+        else if (transform.position.x > _mapConfig.MaxEdgeSize)
+            positionX = _mapConfig.MaxEdgeSize;
+
+        if (transform.position.z < _mapConfig.MinEdgeSize)
+            positionZ = _mapConfig.MinEdgeSize;
+        else if (transform.position.z > _mapConfig.MaxEdgeSize)
+            positionZ = _mapConfig.MaxEdgeSize;
+
         transform.position = new Vector3(positionX, transform.position.y, positionZ);
     }
 }
