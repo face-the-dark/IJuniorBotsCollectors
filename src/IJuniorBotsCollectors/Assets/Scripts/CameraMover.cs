@@ -1,3 +1,4 @@
+using Config;
 using UnityEngine;
 
 public class CameraMover : MonoBehaviour
