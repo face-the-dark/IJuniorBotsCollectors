@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using ResourceComponents;
 using Spawner;
 using UnitComponents;
@@ -9,41 +8,29 @@ namespace Base
 {
     public class ResourceBase : MonoBehaviour
     {
-        [SerializeField] private UnitSpawner _unitSpawner;
+        [SerializeField] private UnitProvider _unitProvider;
         [SerializeField] private ResourceSpawner _resourceSpawner;
-        [SerializeField] private DeliverHandler _deliverHandler;
+        [SerializeField] private ResourceDatabase _resourceDatabase;
 
         private int _collectedResourcesCount;
-        private Queue<Resource> _nonCollectedResources;
 
         public event Action<int> ScoreChanged;
-
-        private void Awake() => 
-            _nonCollectedResources = new Queue<Resource>();
 
         private void Start() => 
             _collectedResourcesCount = 0;
 
-        private void OnEnable()
+        private void Update()
         {
-            _resourceSpawner.ResourceSpawned += OnResourceSpawned;
-            _deliverHandler.UnitDelivered += OnUnitDelivered;
+            if (_resourceDatabase.FoundResourcesCount > 0)
+            {
+                Unit freeUnit = _unitProvider.GetFreeUnit();
+
+                if (freeUnit) 
+                    IssueNextResourceToUnit(freeUnit);
+            }
         }
 
-        private void OnDisable()
-        {
-            _resourceSpawner.ResourceSpawned -= OnResourceSpawned;
-            _deliverHandler.UnitDelivered -= OnUnitDelivered;
-        }
-
-        private void OnResourceSpawned(Resource resource)
-        {
-            _nonCollectedResources.Enqueue(resource);
-            
-            IssueNextResourceToUnit(_unitSpawner.GetFreeUnit());
-        }
-
-        private void OnUnitDelivered(Unit unit, Resource resource)
+        public void PickUpResource(Unit unit, Resource resource)
         {
             UpdateScore();
             
@@ -51,15 +38,7 @@ namespace Base
             IssueNextResourceToUnit(unit);
             
             _resourceSpawner.Release(resource);
-        }
-
-        private void IssueNextResourceToUnit(Unit unit)
-        {
-            if (unit == null) 
-                return;
-        
-            if (TryGetNonCollectedResource(out Resource resource)) 
-                unit.AcceptResource(resource);
+            _resourceDatabase.Release(resource);
         }
 
         private void UpdateScore()
@@ -69,18 +48,15 @@ namespace Base
             ScoreChanged?.Invoke(_collectedResourcesCount);
         }
 
-        private bool TryGetNonCollectedResource(out Resource resource)
+        private void IssueNextResourceToUnit(Unit unit)
         {
-            if (_nonCollectedResources.Count <= 0)
-            {
-                resource = null;
-            
-                return false;
-            }
+            if (unit == null) 
+                return;
 
-            resource = _nonCollectedResources.Dequeue();
-        
-            return true;
+            Resource freeResource = _resourceDatabase.GetFreeResource();
+            
+            if (freeResource) 
+                unit.AcceptResource(freeResource);
         }
     }
 }

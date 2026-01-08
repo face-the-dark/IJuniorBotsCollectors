@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using UnitComponents;
 using UnityEngine;
 
@@ -7,28 +7,26 @@ namespace Spawner
 {
     public class UnitSpawner : MonoBehaviour
     {
+        [SerializeField] private Transform _resourceBase;
         [SerializeField] private Unit _unitPrefab;
         [SerializeField] private int _spawnCount = 3;
-
-        private List<Unit> _spawnedUnits;
-
-        private void Awake() =>
-            _spawnedUnits = new List<Unit>();
+        
+        public event Action<List<Unit>> UnitsSpawned;
 
         private void Start()
         {
+            List<Unit> spawnedUnits = new List<Unit>();
+
             for (int i = 0; i < _spawnCount; i++)
             {
                 Vector3 position = new Vector3(transform.position.x + i, transform.position.y,
                     transform.position.z + i);
                 Unit unit = Instantiate(_unitPrefab, position, Quaternion.identity);
-                _spawnedUnits.Add(unit);
+                unit.SetResourceBasePosition(_resourceBase.position);
+                spawnedUnits.Add(unit);
             }
-        }
 
-        public Unit GetFreeUnit() =>
-            _spawnedUnits
-                .Select(unit => unit)
-                .FirstOrDefault(unit => unit.HasResource == false);
+            UnitsSpawned?.Invoke(spawnedUnits);
+        }
     }
 }

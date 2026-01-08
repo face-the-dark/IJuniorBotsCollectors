@@ -1,4 +1,5 @@
-﻿using Base;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,27 +8,43 @@ namespace UnitComponents
     [RequireComponent(typeof(NavMeshAgent))]
     public class UnitMover : MonoBehaviour
     {
+        [SerializeField] private float _distanceEpsilon = 0.01f;
+        
         private NavMeshAgent _navMeshAgent;
 
-        private Vector3 _resourceBasePosition;
-        private Vector3 _startPosition;
+        private Coroutine _arrivalCoroutine;
+
+        public event Action Arrived;
 
         private void Awake() =>
             _navMeshAgent = GetComponent<NavMeshAgent>();
 
-        private void Start()
+        public void MoveTo(Vector3 position)
         {
-            _resourceBasePosition = FindObjectOfType<ResourceBase>().transform.position;
-            _startPosition = transform.position;
+            _navMeshAgent.SetDestination(position);
+            
+            StopArrivalCoroutine();
+            _arrivalCoroutine = StartCoroutine(CheckArrival());
         }
 
-        public void MoveToStartPosition() =>
-            _navMeshAgent.SetDestination(_startPosition);
+        private void StopArrivalCoroutine()
+        {
+            if (_arrivalCoroutine != null)
+            {
+                StopCoroutine(_arrivalCoroutine);
+                _arrivalCoroutine = null;
+            }
+        }
 
-        public void MoveToResource(Vector3 resourcePosition) =>
-            _navMeshAgent.SetDestination(resourcePosition);
-
-        public void MoveToBase() =>
-            _navMeshAgent.SetDestination(_resourceBasePosition);
+        private IEnumerator CheckArrival()
+        {
+            while (_navMeshAgent.pathPending 
+                   || _navMeshAgent.hasPath
+                   || _navMeshAgent.remainingDistance > _navMeshAgent.stoppingDistance 
+                   || _navMeshAgent.velocity.sqrMagnitude > _distanceEpsilon)
+                yield return null;
+            
+            Arrived?.Invoke();
+        }
     }
 }

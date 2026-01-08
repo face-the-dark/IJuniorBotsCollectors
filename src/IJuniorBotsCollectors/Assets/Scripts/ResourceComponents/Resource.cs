@@ -4,8 +4,6 @@ namespace ResourceComponents
 {
     public class Resource : MonoBehaviour
     {
-        public bool IsBusy { get; set; }
-
         public void Init() => 
             gameObject.SetActive(true);
 

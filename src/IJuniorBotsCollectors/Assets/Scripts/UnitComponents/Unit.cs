@@ -1,39 +1,44 @@
-﻿using ResourceComponents;
+﻿using Base;
+using ResourceComponents;
 using UnityEngine;
 
 namespace UnitComponents
 {
     [RequireComponent(typeof(UnitMover))]
     [RequireComponent(typeof(ResourceCollector))]
-    [RequireComponent(typeof(ResourceDetector))]
     public class Unit : MonoBehaviour
     {
+        private const int ResultsSize = 3;
+        private const float OverlapOffset = 1;
+
         private UnitMover _mover;
-        private ResourceDetector _resourceDetector;
         private ResourceCollector _resourceCollector;
 
         private Resource _currentResource;
-    
+
+        private float _checkOverlapRadius = 1f;
+        private Vector3 _resourceBasePosition;
+        private Vector3 _startPosition;
+
         public bool HasResource => _currentResource != null;
 
         public void Awake()
         {
-            _mover = gameObject.GetComponent<UnitMover>();
-            _resourceDetector = gameObject.GetComponent<ResourceDetector>();
-            _resourceCollector = gameObject.GetComponent<ResourceCollector>();
+            _mover = GetComponent<UnitMover>();
+            _resourceCollector = GetComponent<ResourceCollector>();
         }
 
-        private void OnEnable()
-        {
-            _resourceDetector.Detected += OnResourceDetected;
+        private void Start() =>
+            _startPosition = transform.position;
+
+        private void OnEnable() => 
             _resourceCollector.Collected += OnResourceCollected;
-        }
 
-        private void OnDisable()
-        {
-            _resourceDetector.Detected -= OnResourceDetected;
+        private void OnDisable() => 
             _resourceCollector.Collected -= OnResourceCollected;
-        }
+
+        public void SetResourceBasePosition(Vector3 resourceBasePosition) =>
+            _resourceBasePosition = resourceBasePosition;
 
         public void AcceptResource(Resource resource)
         {
@@ -41,24 +46,42 @@ namespace UnitComponents
                 return;
 
             _currentResource = resource;
-            _mover.MoveToResource(resource.transform.position);
+            _mover.MoveTo(resource.transform.position);
+            _mover.Arrived += OnArrived;
         }
 
         public void Reset()
         {
             _currentResource = null;
-            _mover.MoveToStartPosition();
+            _resourceCollector.Reset();
+            _mover.MoveTo(_startPosition);
+            _mover.Arrived += OnArrived;
         }
 
-        private void OnResourceDetected(Resource resource)
+        private void OnResourceCollected()
         {
-            if (_currentResource != resource)
-                return;
-
-            _resourceCollector.Collect(resource);
+            _mover.MoveTo(_resourceBasePosition);
+            _mover.Arrived += OnArrived;
         }
 
-        private void OnResourceCollected() => 
-            _mover.MoveToBase();
+        private void OnArrived()
+        {
+            Collider[] results = new Collider[ResultsSize];
+
+            Vector3 checkPosition = new Vector3(transform.position.x, transform.position.y - OverlapOffset,
+                transform.position.z);
+            Physics.OverlapSphereNonAlloc(checkPosition, _checkOverlapRadius, results);
+
+            foreach (Collider result in results)
+            {
+                if (result && result.TryGetComponent(out Resource resource))
+                    _resourceCollector.Collect(resource);
+
+                if (result && result.TryGetComponent(out ResourceBase resourceBase) && _resourceCollector.IsCollected)
+                    resourceBase.PickUpResource(this, _currentResource);
+            }
+
+            _mover.Arrived -= OnArrived;
+        }
     }
 }
