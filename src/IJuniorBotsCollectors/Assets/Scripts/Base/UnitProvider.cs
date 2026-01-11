@@ -26,5 +26,8 @@ namespace Base
 
         public Unit GetFreeUnit() =>
             _units.FirstOrDefault(unit => unit.HasResource == false);
+
+        public void CreateNewUnit() => 
+            _units.Add(_unitSpawner.SpawnNewUnit());
     }
 }

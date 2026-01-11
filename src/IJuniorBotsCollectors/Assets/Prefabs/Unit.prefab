@@ -42,12 +42,10 @@ GameObject:
   - component: {fileID: 3594993890611891048}
   - component: {fileID: 5044907651233176845}
   - component: {fileID: 7351921760935273939}
-  - component: {fileID: 2855726806677134068}
   - component: {fileID: 8788284044630637366}
   - component: {fileID: 1262795219383813442}
   - component: {fileID: 8096517308329276974}
   - component: {fileID: 3788139789870157741}
-  - component: {fileID: 1335232708897846511}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -121,29 +119,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2855726806677134068
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7659498030181912830}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!195 &8788284044630637366
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -153,7 +128,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 7659498030181912830}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.1
   m_Speed: 20
   m_Acceleration: 8
   avoidancePriority: 50
@@ -178,6 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73100025bb9e43d49b4039d19f350c77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _distanceEpsilon: 0.01
 --- !u!114 &8096517308329276974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,30 +180,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _attachPoint: {fileID: 8124022774736647889}
   _collectingTime: 1
---- !u!54 &1335232708897846511
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7659498030181912830}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0

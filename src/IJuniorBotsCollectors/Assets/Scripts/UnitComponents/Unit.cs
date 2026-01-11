@@ -40,6 +40,14 @@ namespace UnitComponents
         public void SetResourceBasePosition(Vector3 resourceBasePosition) =>
             _resourceBasePosition = resourceBasePosition;
 
+        public void UpdateStartPosition(Vector3 spawnPosition)
+        {
+            _startPosition = spawnPosition;
+
+            if (_currentResource == null) 
+                _mover.MoveTo(_startPosition);
+        }
+
         public void AcceptResource(Resource resource)
         {
             if (_currentResource != null)

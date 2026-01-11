@@ -11,12 +11,13 @@ namespace Base
         [SerializeField] private UnitProvider _unitProvider;
         [SerializeField] private ResourceSpawner _resourceSpawner;
         [SerializeField] private ResourceDatabase _resourceDatabase;
+        [SerializeField] private int _resourcesCountForSpawnNewUnit = 3;
 
         private int _collectedResourcesCount;
 
         public event Action<int> ScoreChanged;
 
-        private void Start() => 
+        private void Start() =>
             _collectedResourcesCount = 0;
 
         private void Update()
@@ -25,7 +26,7 @@ namespace Base
             {
                 Unit freeUnit = _unitProvider.GetFreeUnit();
 
-                if (freeUnit) 
+                if (freeUnit)
                     IssueNextResourceToUnit(freeUnit);
             }
         }
@@ -36,26 +37,39 @@ namespace Base
             
             unit.Reset();
             IssueNextResourceToUnit(unit);
-            
+
             _resourceSpawner.Release(resource);
             _resourceDatabase.Release(resource);
+
+            TrySpawnNewUnit();
+        }
+
+        private void TrySpawnNewUnit()
+        {
+            if (_collectedResourcesCount == _resourcesCountForSpawnNewUnit)
+            {
+                _unitProvider.CreateNewUnit();
+                _collectedResourcesCount -= _resourcesCountForSpawnNewUnit;
+                
+                ScoreChanged?.Invoke(_collectedResourcesCount);
+            }
         }
 
         private void UpdateScore()
         {
             _collectedResourcesCount++;
-            
+
             ScoreChanged?.Invoke(_collectedResourcesCount);
         }
 
         private void IssueNextResourceToUnit(Unit unit)
         {
-            if (unit == null) 
+            if (unit == null)
                 return;
 
             Resource freeResource = _resourceDatabase.GetFreeResource();
-            
-            if (freeResource) 
+
+            if (freeResource)
                 unit.AcceptResource(freeResource);
         }
     }
