@@ -4,14 +4,24 @@ using UnityEngine;
 public class CameraMover : MonoBehaviour
 {
     [SerializeField] private MapConfig _mapConfig;
+    [SerializeField] private InputReader _inputReader;
     [SerializeField] private float _speed = 30f;
+
+    private Vector3 _direction;
+
+    private void OnEnable()
+    {
+        _inputReader.Moved += OnMoved;
+    }
+
+    private void OnDisable()
+    {
+        _inputReader.Moved -= OnMoved;
+    }
 
     private void Update()
     {
-        Vector3 viewportPoint = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-
-        Vector3 direction = DetermineDirection(viewportPoint);
-
+        Vector3 direction = new Vector3(_direction.x, _direction.y, _direction.z);
         direction *= _speed * Time.deltaTime;
 
         transform.Translate(direction, Space.Self);
@@ -19,21 +29,9 @@ public class CameraMover : MonoBehaviour
         LimitByBorders();
     }
 
-    private Vector3 DetermineDirection(Vector3 viewportPoint)
+    private void OnMoved(Vector3 direction)
     {
-        Vector3 direction = Vector3.zero;
-
-        if (viewportPoint.x <= 0)
-            direction.x = -1;
-        else if (viewportPoint.x > 1)
-            direction.x = 1;
-
-        if (viewportPoint.y <= 0)
-            direction.z = -1;
-        else if (viewportPoint.y >= 1)
-            direction.z = 1;
-
-        return direction;
+        _direction = direction;
     }
 
     private void LimitByBorders()
