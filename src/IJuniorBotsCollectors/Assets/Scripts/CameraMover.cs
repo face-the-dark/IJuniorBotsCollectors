@@ -9,15 +9,11 @@ public class CameraMover : MonoBehaviour
 
     private Vector3 _direction;
 
-    private void OnEnable()
-    {
-        _inputReader.Moved += OnMoved;
-    }
+    private void OnEnable() => 
+        _inputReader.Moved += SetDirection;
 
-    private void OnDisable()
-    {
-        _inputReader.Moved -= OnMoved;
-    }
+    private void OnDisable() => 
+        _inputReader.Moved -= SetDirection;
 
     private void Update()
     {
@@ -29,10 +25,8 @@ public class CameraMover : MonoBehaviour
         LimitByBorders();
     }
 
-    private void OnMoved(Vector3 direction)
-    {
+    private void SetDirection(Vector3 direction) => 
         _direction = direction;
-    }
 
     private void LimitByBorders()
     {
