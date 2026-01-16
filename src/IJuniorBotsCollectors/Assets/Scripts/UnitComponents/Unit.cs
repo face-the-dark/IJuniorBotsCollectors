@@ -1,4 +1,5 @@
-﻿using Base;
+﻿using System;
+using Base;
 using ResourceComponents;
 using UnityEngine;
 
@@ -20,9 +21,11 @@ namespace UnitComponents
         private float _checkOverlapRadius = 1f;
         private Vector3 _deliveryPosition;
         private Vector3 _startPosition;
-
+        
         public bool HasResource => _currentResource != null;
 
+        public event Action<Unit> BuildStarting;
+        
         public void Awake()
         {
             _mover = GetComponent<UnitMover>();
@@ -114,6 +117,8 @@ namespace UnitComponents
                 else if (result && result.TryGetComponent(out Flag flag))
                 {
                     _resourceBaseBuilder.Build(flag.transform.position, this);
+                    
+                    BuildStarting?.Invoke(this);
                 }
             }
 

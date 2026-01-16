@@ -503,7 +503,7 @@ GameObject:
   - component: {fileID: 883413292}
   - component: {fileID: 883413293}
   m_Layer: 0
-  m_Name: ClickHandler
+  m_Name: FlagMover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -538,7 +538,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _mainCamera: {fileID: 963194227}
   _inputReader: {fileID: 456155156}
-  _groundLayer:
+  _ignoreMask:
     serializedVersion: 2
     m_Bits: 64
 --- !u!1 &963194225
@@ -646,7 +646,7 @@ GameObject:
   - component: {fileID: 1143979525}
   - component: {fileID: 1143979524}
   - component: {fileID: 1143979528}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}

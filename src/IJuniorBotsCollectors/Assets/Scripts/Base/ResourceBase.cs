@@ -69,15 +69,14 @@ namespace Base
 
         public Flag TakeFlag()
         {
-            _flag.gameObject.SetActive(true);
+            if (_unitProvider.IsMoreOneUnit)
+            {
+                _flag.gameObject.SetActive(true);
+                
+                return _flag;
+            }
 
-            return _flag;
-        }
-
-        public void ResetFlag()
-        {
-            _flag.gameObject.SetActive(false);
-            _flag.transform.position = transform.position;
+            return null;
         }
 
         public void ChangePriority(TargetPriority targetPriority)
@@ -144,11 +143,21 @@ namespace Base
                     _collectedResourcesCount -= _resourcesCountForBuildNewResourceBase;
 
                     freeUnit.BuildNewResourceBasePosition(_flag.transform.position, _resourceBaseBuilder);
-                    _unitProvider.DisconnectUnit(freeUnit);
+                    freeUnit.BuildStarting += ResetFlag;
                     
+                    _unitProvider.DisconnectUnit(freeUnit);
+
                     ChangePriority(TargetPriority.SpawnNewUnits);
                 }
             }
+        }
+
+        private void ResetFlag(Unit unit)
+        {
+            _flag.gameObject.SetActive(false);
+            _flag.transform.position = transform.position;
+            
+            unit.BuildStarting -= ResetFlag;
         }
 
         private void UpdateScore()

@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using Base;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 public class FlagMover : MonoBehaviour
 {
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private InputReader _inputReader;
-    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private LayerMask _ignoreMask;
 
     private Coroutine _moveFlagCoroutine;
     private Vector2 _mousePosition;
@@ -29,16 +30,19 @@ public class FlagMover : MonoBehaviour
     {
         Ray ray = _mainCamera.ScreenPointToRay(mousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, _groundLayer))
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, ~_ignoreMask))
         {
             if (_takenFlag == null && hit.collider.TryGetComponent(out _resourceBase))
             {
                 _takenFlag = _resourceBase.TakeFlag();
-                
-                StopMoveFlagCoroutine();
-                _moveFlagCoroutine = StartCoroutine(MoveFlag());
+
+                if (_takenFlag)
+                {
+                    StopMoveFlagCoroutine();
+                    _moveFlagCoroutine = StartCoroutine(MoveFlag());
+                }
             }
-            else if (_takenFlag)
+            else if (_takenFlag && hit.collider.TryGetComponent(out NavMeshSurface navMeshSurface))
             {
                 StopMoveFlagCoroutine();
 

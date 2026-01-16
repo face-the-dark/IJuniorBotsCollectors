@@ -16,6 +16,8 @@ namespace Base
         private List<Unit> _units;
         private int _currentUnitsCount;
         
+        public bool IsMoreOneUnit => _currentUnitsCount > 1;
+
         private void Awake()
         {
             _unitSpawner = GetComponent<UnitSpawner>();
