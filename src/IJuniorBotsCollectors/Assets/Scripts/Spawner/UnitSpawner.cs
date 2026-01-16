@@ -54,7 +54,7 @@ namespace Spawner
         private Unit SpawnUnit(Vector3 position)
         {
             Unit unit = Instantiate(_unitPrefab, position, Quaternion.identity);
-            unit.SetResourceBasePosition(_resourceBase.position);
+            unit.SetDeliveryPosition(_resourceBase.position);
             
             return unit;
         }

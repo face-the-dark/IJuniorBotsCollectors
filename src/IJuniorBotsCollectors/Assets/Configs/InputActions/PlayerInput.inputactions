@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "MousePosition",
+                    "name": "CursorDrag",
                     "type": "Value",
                     "id": "001757b8-2a21-4f22-88f7-283b9b0929d8",
                     "expectedControlType": "Vector2",
@@ -118,7 +118,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MousePosition",
+                    "action": "CursorDrag",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

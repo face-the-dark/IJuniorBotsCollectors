@@ -37,7 +37,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""MousePosition"",
+                    ""name"": ""CursorDrag"",
                     ""type"": ""Value"",
                     ""id"": ""001757b8-2a21-4f22-88f7-283b9b0929d8"",
                     ""expectedControlType"": ""Vector2"",
@@ -140,7 +140,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MousePosition"",
+                    ""action"": ""CursorDrag"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -180,7 +180,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-        m_Player_MousePosition = m_Player.FindAction("MousePosition", throwIfNotFound: true);
+        m_Player_CursorDrag = m_Player.FindAction("CursorDrag", throwIfNotFound: true);
         m_Player_Click = m_Player.FindAction("Click", throwIfNotFound: true);
     }
 
@@ -244,14 +244,14 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
-    private readonly InputAction m_Player_MousePosition;
+    private readonly InputAction m_Player_CursorDrag;
     private readonly InputAction m_Player_Click;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
         public PlayerActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Player_Move;
-        public InputAction @MousePosition => m_Wrapper.m_Player_MousePosition;
+        public InputAction @CursorDrag => m_Wrapper.m_Player_CursorDrag;
         public InputAction @Click => m_Wrapper.m_Player_Click;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
@@ -265,9 +265,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
-            @MousePosition.started += instance.OnMousePosition;
-            @MousePosition.performed += instance.OnMousePosition;
-            @MousePosition.canceled += instance.OnMousePosition;
+            @CursorDrag.started += instance.OnCursorDrag;
+            @CursorDrag.performed += instance.OnCursorDrag;
+            @CursorDrag.canceled += instance.OnCursorDrag;
             @Click.started += instance.OnClick;
             @Click.performed += instance.OnClick;
             @Click.canceled += instance.OnClick;
@@ -278,9 +278,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
-            @MousePosition.started -= instance.OnMousePosition;
-            @MousePosition.performed -= instance.OnMousePosition;
-            @MousePosition.canceled -= instance.OnMousePosition;
+            @CursorDrag.started -= instance.OnCursorDrag;
+            @CursorDrag.performed -= instance.OnCursorDrag;
+            @CursorDrag.canceled -= instance.OnCursorDrag;
             @Click.started -= instance.OnClick;
             @Click.performed -= instance.OnClick;
             @Click.canceled -= instance.OnClick;
@@ -313,7 +313,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     public interface IPlayerActions
     {
         void OnMove(InputAction.CallbackContext context);
-        void OnMousePosition(InputAction.CallbackContext context);
+        void OnCursorDrag(InputAction.CallbackContext context);
         void OnClick(InputAction.CallbackContext context);
     }
 }

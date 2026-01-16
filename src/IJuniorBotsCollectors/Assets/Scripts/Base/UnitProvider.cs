@@ -29,5 +29,14 @@ namespace Base
 
         public void CreateNewUnit() => 
             _units.Add(_unitSpawner.SpawnNewUnit());
+
+        public void SetDeliveryPositionForAllUnits(Vector3 flagPosition) => 
+            _units.ForEach(unit => unit.SetDeliveryPosition(flagPosition));
+
+        public void DisconnectUnit(Unit unit) => 
+            _units.Remove(unit);
+
+        public void AddUnit(Unit unit) => 
+            _units.Add(unit);
     }
 }

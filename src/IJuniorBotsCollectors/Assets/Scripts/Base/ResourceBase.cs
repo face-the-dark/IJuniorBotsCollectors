@@ -1,4 +1,5 @@
 ﻿using System;
+using Base.Scanner;
 using ResourceComponents;
 using Spawner;
 using UnitComponents;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace Base
 {
+    [RequireComponent(typeof(ResourceScanner))]
     public class ResourceBase : MonoBehaviour
     {
         [SerializeField] private UnitProvider _unitProvider;
@@ -14,11 +16,22 @@ namespace Base
         [SerializeField] private int _resourcesCountForSpawnNewUnit = 3;
 
         private int _collectedResourcesCount;
-
+        private bool _hasFlag;
+        
         public event Action<int> ScoreChanged;
 
-        private void Start() =>
+        public void Construct(ResourceSpawner resourceSpawner, ResourceDatabase resourceDatabase)
+        {
+            _resourceSpawner = resourceSpawner;
+            _resourceDatabase = resourceDatabase;
+        }
+        
+        private void Start()
+        {
             _collectedResourcesCount = 0;
+            _hasFlag = true;
+            _resourceDatabase.AddScanner(GetComponent<ResourceScanner>());
+        }
 
         private void Update()
         {
@@ -34,15 +47,39 @@ namespace Base
         public void PickUpResource(Unit unit, Resource resource)
         {
             UpdateScore();
-            
+            Release(unit, resource);
+            TrySpawnNewUnit();
+        }
+
+        public void Release(Unit unit, Resource resource)
+        {
             unit.Reset();
             IssueNextResourceToUnit(unit);
 
             _resourceSpawner.Release(resource);
             _resourceDatabase.Release(resource);
-
-            TrySpawnNewUnit();
         }
+        
+        public void ChangePriorityToBuild(Vector3 flagPosition) => 
+            _unitProvider.SetDeliveryPositionForAllUnits(flagPosition);
+
+        public void ChangePriorityToCollect() => 
+            _unitProvider.SetDeliveryPositionForAllUnits(transform.position);
+
+        public bool TryTakeFlag()
+        {
+            if (_hasFlag)
+            {
+                _hasFlag = false;
+                
+                return true;
+            }
+            
+            return false;
+        }
+
+        public void ResetFlag() => 
+            _hasFlag = true;
 
         private void TrySpawnNewUnit()
         {
@@ -71,6 +108,22 @@ namespace Base
 
             if (freeResource)
                 unit.AcceptResource(freeResource);
+        }
+
+        public void BuildNewResourceBase(Vector3 flagPosition)
+        {
+            Unit freeUnit = _unitProvider.GetFreeUnit();
+
+            if (freeUnit)
+                freeUnit.MoveToNewResourceBasePosition(flagPosition, _resourceSpawner, _resourceDatabase);
+            
+            _unitProvider.DisconnectUnit(freeUnit);
+        }
+
+        public void JoinUnit(Unit unit)
+        {
+            _unitProvider.AddUnit(unit);
+            unit.Reset();
         }
     }
 }
