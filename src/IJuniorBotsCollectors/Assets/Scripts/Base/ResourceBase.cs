@@ -1,5 +1,6 @@
 ﻿using System;
 using Base.Scanner;
+using FlagComponents;
 using ResourceComponents;
 using Spawner;
 using UnitComponents;
@@ -142,7 +143,7 @@ namespace Base
                 {
                     _collectedResourcesCount -= _resourcesCountForBuildNewResourceBase;
 
-                    freeUnit.BuildNewResourceBasePosition(_flag.transform.position, _resourceBaseBuilder);
+                    freeUnit.MoveToNewResourceBasePosition(_flag.transform.position, _resourceBaseBuilder);
                     freeUnit.BuildStarting += ResetFlag;
                     
                     _unitProvider.DisconnectUnit(freeUnit);

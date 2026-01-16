@@ -1,5 +1,6 @@
 ﻿using System;
 using Base;
+using FlagComponents;
 using ResourceComponents;
 using UnityEngine;
 
@@ -72,7 +73,7 @@ namespace UnitComponents
             _mover.Arrived += OnArrived;
         }
 
-        public void BuildNewResourceBasePosition(Vector3 flagPosition, ResourceBaseBuilder resourceBaseBuilder)
+        public void MoveToNewResourceBasePosition(Vector3 flagPosition, ResourceBaseBuilder resourceBaseBuilder)
         {
             _resourceBaseBuilder = resourceBaseBuilder;
             
