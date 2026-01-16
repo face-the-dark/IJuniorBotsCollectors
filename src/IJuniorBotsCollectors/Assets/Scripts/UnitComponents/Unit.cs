@@ -1,6 +1,5 @@
 ﻿using Base;
 using ResourceComponents;
-using Spawner;
 using UnityEngine;
 
 namespace UnitComponents
@@ -9,22 +8,18 @@ namespace UnitComponents
     [RequireComponent(typeof(ResourceCollector))]
     public class Unit : MonoBehaviour
     {
-        [SerializeField] private ResourceBase _resourceBasePrefab;
-
         private const int ResultsSize = 3;
         private const float OverlapOffset = 1;
 
         private UnitMover _mover;
         private ResourceCollector _resourceCollector;
+        private ResourceBaseBuilder _resourceBaseBuilder;
 
         private Resource _currentResource;
 
         private float _checkOverlapRadius = 1f;
         private Vector3 _deliveryPosition;
         private Vector3 _startPosition;
-
-        private ResourceSpawner _resourceSpawner;
-        private ResourceDatabase _resourceDatabase;
 
         public bool HasResource => _currentResource != null;
 
@@ -60,6 +55,7 @@ namespace UnitComponents
                 return;
 
             _currentResource = resource;
+            
             _mover.MoveTo(resource.transform.position);
             _mover.Arrived += OnArrived;
         }
@@ -68,22 +64,17 @@ namespace UnitComponents
         {
             _currentResource = null;
             _resourceCollector.Reset();
+            
             _mover.MoveTo(_startPosition);
             _mover.Arrived += OnArrived;
         }
 
-        public void MoveToNewResourceBasePosition
-        (
-            Vector3 flagPosition,
-            ResourceSpawner resourceSpawner,
-            ResourceDatabase resourceDatabase
-        )
+        public void BuildNewResourceBasePosition(Vector3 flagPosition, ResourceBaseBuilder resourceBaseBuilder)
         {
+            _resourceBaseBuilder = resourceBaseBuilder;
+            
             _mover.MoveTo(flagPosition);
             _mover.Arrived += OnArrived;
-            
-            _resourceSpawner =  resourceSpawner;
-            _resourceDatabase = resourceDatabase;
         }
 
         private void OnResourceCollected()
@@ -96,8 +87,13 @@ namespace UnitComponents
         {
             Collider[] results = new Collider[ResultsSize];
 
-            Vector3 checkPosition = new Vector3(transform.position.x, transform.position.y - OverlapOffset,
-                transform.position.z);
+            Vector3 checkPosition = new Vector3
+            (
+                transform.position.x,
+                transform.position.y - OverlapOffset,
+                transform.position.z
+            );
+
             Physics.OverlapSphereNonAlloc(checkPosition, _checkOverlapRadius, results);
 
             foreach (Collider result in results)
@@ -106,30 +102,22 @@ namespace UnitComponents
                 {
                     _resourceCollector.Collect(resource);
                 }
-                else if (result && result.TryGetComponent(out ResourceBase resourceBase) &&
-                         _resourceCollector.IsCollected)
+                else if
+                (
+                    result
+                    && result.TryGetComponent(out ResourceBase resourceBase)
+                    && _resourceCollector.IsCollected
+                )
                 {
                     resourceBase.PickUpResource(this, _currentResource);
                 }
                 else if (result && result.TryGetComponent(out Flag flag))
                 {
-                    if (_resourceCollector.IsCollected)
-                        flag.PickUpResource(this, _currentResource);
-                    else
-                        BuildNewResourceBase(flag);
+                    _resourceBaseBuilder.Build(flag.transform.position, this);
                 }
             }
 
             _mover.Arrived -= OnArrived;
-        }
-
-        private void BuildNewResourceBase(Flag flag)
-        {
-            ResourceBase resourceBase = Instantiate(_resourceBasePrefab, flag.transform.position, Quaternion.identity);
-            resourceBase.Construct(_resourceSpawner, _resourceDatabase);
-            Destroy(flag);
-
-            resourceBase.JoinUnit(this);
         }
     }
 }

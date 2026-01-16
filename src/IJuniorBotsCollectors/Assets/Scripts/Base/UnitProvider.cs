@@ -6,14 +6,24 @@ using UnityEngine;
 
 namespace Base
 {
+    [RequireComponent(typeof(UnitSpawner))]
+    [RequireComponent(typeof(PositionCalculator))]
     public class UnitProvider : MonoBehaviour
     {
-        [SerializeField] private UnitSpawner _unitSpawner;
+        private UnitSpawner _unitSpawner;
+        private PositionCalculator  _positionCalculator;
 
         private List<Unit> _units;
-
-        private void Awake() => 
+        private int _currentUnitsCount;
+        
+        private void Awake()
+        {
+            _unitSpawner = GetComponent<UnitSpawner>();
+            _positionCalculator = GetComponent<PositionCalculator>();
+            
             _units = new List<Unit>();
+            _currentUnitsCount = 0;
+        }
 
         private void OnEnable() =>
             _unitSpawner.UnitsSpawned += InitUnits;
@@ -21,22 +31,57 @@ namespace Base
         private void OnDisable() =>
             _unitSpawner.UnitsSpawned -= InitUnits;
 
-        private void InitUnits(List<Unit> units) =>
-            _units.AddRange(units);
-
         public Unit GetFreeUnit() =>
             _units.FirstOrDefault(unit => unit.HasResource == false);
 
-        public void CreateNewUnit() => 
-            _units.Add(_unitSpawner.SpawnNewUnit());
+        public void SpawnStartUnits()
+        {
+            _currentUnitsCount = _unitSpawner.StartSpawnCount;
+            
+            Vector3[] spawnPositions = _positionCalculator.CalculateSpawnPositions(_currentUnitsCount);
+            _unitSpawner.SpawnStartUnits(spawnPositions);
+        }
 
-        public void SetDeliveryPositionForAllUnits(Vector3 flagPosition) => 
-            _units.ForEach(unit => unit.SetDeliveryPosition(flagPosition));
+        public void CreateNewUnit()
+        {
+            _currentUnitsCount++;
+            
+            Vector3[] spawnPositions = _positionCalculator.CalculateSpawnPositions(_currentUnitsCount);
 
-        public void DisconnectUnit(Unit unit) => 
+            UpdateStartPositionsForAllUnits(spawnPositions);
+            
+            _units.Add(_unitSpawner.SpawnUnit(spawnPositions[^1]));
+        }
+
+        public void DisconnectUnit(Unit unit)
+        {
+            _currentUnitsCount--;
+            
+            Vector3[] spawnPositions = _positionCalculator.CalculateSpawnPositions(_currentUnitsCount);
+
             _units.Remove(unit);
+            
+            UpdateStartPositionsForAllUnits(spawnPositions);
+        }
 
-        public void AddUnit(Unit unit) => 
+        public void ConnectUnit(Unit unit)
+        {
+            _currentUnitsCount++;
+            
+            Vector3[] spawnPositions = _positionCalculator.CalculateSpawnPositions(_currentUnitsCount);
+
             _units.Add(unit);
+            
+            UpdateStartPositionsForAllUnits(spawnPositions);
+        }
+
+        private void InitUnits(List<Unit> units) =>
+            _units.AddRange(units);
+
+        private void UpdateStartPositionsForAllUnits(Vector3[] spawnPositions)
+        {
+            for (int i = 0; i < _units.Count; i++)
+                _units[i].UpdateStartPosition(spawnPositions[i]);
+        }
     }
 }
