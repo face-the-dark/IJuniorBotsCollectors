@@ -24,7 +24,7 @@ namespace UnitComponents
         public void Collect(Resource resource)
         {
             StopCollectCoroutine();
-            StartCoroutine(Reparent(resource));
+            _collectCoroutine = StartCoroutine(Reparent(resource));
         }
 
         public void Reset() => 
