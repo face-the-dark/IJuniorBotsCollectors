@@ -12,14 +12,13 @@ namespace Spawner
     {
         private const int BaseCount = 1;
 
-        [SerializeField] private ResourceBase _resourceBase;
+        [SerializeField] private Vector3 _resourceBaseColliderSize = Vector3.one;
         [SerializeField] private MapConfig _mapConfig;
         [SerializeField] private Resource resourcePrefab;
         [SerializeField] private float _delay = 2f;
 
         private ObjectPool<Resource> _pool;
         private Coroutine _spawnCoroutine;
-        private BoxCollider _resourceBaseCollider;
 
         private void Awake()
         {
@@ -29,8 +28,6 @@ namespace Spawner
                 actionOnRelease: ResetResource,
                 actionOnDestroy: Destroy
             );
-
-            _resourceBaseCollider = _resourceBase.GetComponent<BoxCollider>();
         }
 
         private void Start()
@@ -79,12 +76,12 @@ namespace Spawner
             Collider[] baseColliders = new Collider[BaseCount];
 
             Vector3 position = GenerateRandomPosition();
-            Physics.OverlapBoxNonAlloc(position, _resourceBaseCollider.size, baseColliders);
+            Physics.OverlapBoxNonAlloc(position, _resourceBaseColliderSize, baseColliders);
 
             while (baseColliders[0].GetComponent<ResourceBase>())
             {
                 position = GenerateRandomPosition();
-                Physics.OverlapBoxNonAlloc(position, _resourceBaseCollider.size, baseColliders);
+                Physics.OverlapBoxNonAlloc(position, _resourceBaseColliderSize, baseColliders);
             }
 
             return position;

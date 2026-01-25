@@ -8,8 +8,7 @@ namespace Base
 {
     public class ResourceDatabase : MonoBehaviour
     {
-        [SerializeField] private ResourceScanner _resourceScanner;
-        
+        private List<ResourceScanner> _resourceScanners;
         private List<Resource> _foundResources;
         private List<Resource> _busyResources;
         
@@ -17,16 +16,20 @@ namespace Base
 
         private void Awake()
         {
+            _resourceScanners = new List<ResourceScanner>();
             _foundResources = new List<Resource>();
             _busyResources = new List<Resource>();
         }
 
         private void OnDisable() => 
-            _resourceScanner.ResourcesFound -= AddFoundResources;
+            _resourceScanners.ForEach(scanner => scanner.ResourcesFound -= AddFoundResources);
 
-        private void OnEnable() => 
-            _resourceScanner.ResourcesFound += AddFoundResources;
-
+        public void AddScanner(ResourceScanner scanner)
+        {
+            _resourceScanners.Add(scanner);
+            scanner.ResourcesFound += AddFoundResources;
+        }
+        
         public Resource GetFreeResource()
         {
             if (_foundResources.Count <= 0)

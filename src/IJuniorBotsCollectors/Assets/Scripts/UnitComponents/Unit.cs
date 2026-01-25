@@ -1,4 +1,6 @@
-﻿using Base;
+﻿using System;
+using Base;
+using FlagComponents;
 using ResourceComponents;
 using UnityEngine;
 
@@ -13,15 +15,18 @@ namespace UnitComponents
 
         private UnitMover _mover;
         private ResourceCollector _resourceCollector;
+        private ResourceBaseBuilder _resourceBaseBuilder;
 
         private Resource _currentResource;
 
         private float _checkOverlapRadius = 1f;
-        private Vector3 _resourceBasePosition;
+        private Vector3 _deliveryPosition;
         private Vector3 _startPosition;
-
+        
         public bool HasResource => _currentResource != null;
 
+        public event Action<Unit> BuildStarting;
+        
         public void Awake()
         {
             _mover = GetComponent<UnitMover>();
@@ -31,14 +36,22 @@ namespace UnitComponents
         private void Start() =>
             _startPosition = transform.position;
 
-        private void OnEnable() => 
+        private void OnEnable() =>
             _resourceCollector.Collected += OnResourceCollected;
 
-        private void OnDisable() => 
+        private void OnDisable() =>
             _resourceCollector.Collected -= OnResourceCollected;
 
-        public void SetResourceBasePosition(Vector3 resourceBasePosition) =>
-            _resourceBasePosition = resourceBasePosition;
+        public void SetDeliveryPosition(Vector3 deliveryPosition) =>
+            _deliveryPosition = deliveryPosition;
+
+        public void UpdateStartPosition(Vector3 spawnPosition)
+        {
+            _startPosition = spawnPosition;
+
+            if (_currentResource == null)
+                _mover.MoveTo(_startPosition);
+        }
 
         public void AcceptResource(Resource resource)
         {
@@ -46,6 +59,7 @@ namespace UnitComponents
                 return;
 
             _currentResource = resource;
+            
             _mover.MoveTo(resource.transform.position);
             _mover.Arrived += OnArrived;
         }
@@ -54,13 +68,22 @@ namespace UnitComponents
         {
             _currentResource = null;
             _resourceCollector.Reset();
+            
             _mover.MoveTo(_startPosition);
+            _mover.Arrived += OnArrived;
+        }
+
+        public void MoveToNewResourceBasePosition(Vector3 flagPosition, ResourceBaseBuilder resourceBaseBuilder)
+        {
+            _resourceBaseBuilder = resourceBaseBuilder;
+            
+            _mover.MoveTo(flagPosition);
             _mover.Arrived += OnArrived;
         }
 
         private void OnResourceCollected()
         {
-            _mover.MoveTo(_resourceBasePosition);
+            _mover.MoveTo(_deliveryPosition);
             _mover.Arrived += OnArrived;
         }
 
@@ -68,17 +91,36 @@ namespace UnitComponents
         {
             Collider[] results = new Collider[ResultsSize];
 
-            Vector3 checkPosition = new Vector3(transform.position.x, transform.position.y - OverlapOffset,
-                transform.position.z);
+            Vector3 checkPosition = new Vector3
+            (
+                transform.position.x,
+                transform.position.y - OverlapOffset,
+                transform.position.z
+            );
+
             Physics.OverlapSphereNonAlloc(checkPosition, _checkOverlapRadius, results);
 
             foreach (Collider result in results)
             {
                 if (result && result.TryGetComponent(out Resource resource))
+                {
                     _resourceCollector.Collect(resource);
-
-                if (result && result.TryGetComponent(out ResourceBase resourceBase) && _resourceCollector.IsCollected)
+                }
+                else if
+                (
+                    result
+                    && result.TryGetComponent(out ResourceBase resourceBase)
+                    && _resourceCollector.IsCollected
+                )
+                {
                     resourceBase.PickUpResource(this, _currentResource);
+                }
+                else if (result && result.TryGetComponent(out Flag flag))
+                {
+                    _resourceBaseBuilder.Build(flag.transform.position, this);
+                    
+                    BuildStarting?.Invoke(this);
+                }
             }
 
             _mover.Arrived -= OnArrived;

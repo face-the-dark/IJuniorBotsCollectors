@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UI
 {
-    public class ResourceView : MonoBehaviour
+    public class ResourcesCountView : MonoBehaviour
     {
         private const string StartCount = "0";
         

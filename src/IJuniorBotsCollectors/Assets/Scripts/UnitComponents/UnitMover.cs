@@ -24,7 +24,7 @@ namespace UnitComponents
             _navMeshAgent.SetDestination(position);
             
             StopArrivalCoroutine();
-            _arrivalCoroutine = StartCoroutine(CheckArrival());
+            _arrivalCoroutine = StartCoroutine(ConfirmArrival());
         }
 
         private void StopArrivalCoroutine()
@@ -36,7 +36,7 @@ namespace UnitComponents
             }
         }
 
-        private IEnumerator CheckArrival()
+        private IEnumerator ConfirmArrival()
         {
             while (_navMeshAgent.pathPending 
                    || _navMeshAgent.hasPath
